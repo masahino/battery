@@ -7,7 +7,13 @@
 #echo "${percent}%"
 
 ioreg -n AppleSmartBattery  -r | \
-awk 'BEGIN{FS="="; max = 0; current = 0;}
-$1~/MaxCapacity/ {max = $2}
-$1~/CurrentCapacity/ {current = $2}
-END { printf("%d%%", 100 * current/max); }'
+awk '
+$1~/MaxCapacity/ {max = $3}
+$1~/CurrentCapacity/ {current = $3}
+$1~/IsCharging/ {is_charging = $3}
+$1~/TimeRemaining/ {remaining = $3}
+END { 
+	printf("%d%% ", 100 * current/max);
+	if (is_charging == "No") 
+		printf("(%d:%02d)", remaining/60, remaining % 60);
+}'
